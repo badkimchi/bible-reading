@@ -1,55 +1,36 @@
-# [Chi](https://go-chi.io/#/) Template
+# `template-go-chi`
 
-This template deploys a base ready-to-use Chi app.
+A minimal production-ready golang HTTP server with [`go-chi/chi`](https://github.com/go-chi/chi).
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/1H34tp?referralCode=ySCnWl)
+✅ Graceful shutdown \
+✅ Tracing with OpenTelemetry \
+✅ Trust proxy resolution \
+✅ Structured logging with `log/slog` \
+✅ Rich request logging middleware including bytes written/read, request id, trace id, context propagation, and more \
+✅ Panic recovery with rich logging including request id and trace id
 
-## Features
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/FdfQPz?referralCode=ToZEjF)
 
- - Two examples of custom middleware:
-    
-    - **TrustProxy:** Checks if the request IP matches one of the provided ranges/IPs, then inspects common reverse proxy headers and sets the corresponding, fields in the HTTP request struct for use by middleware or handlers that are next.
+## Installation
 
-        Useful for trusting the `X-Forwarded-For` and `X-Forwarded-Proto` headers that Railway's proxy sets.
+Go 1.20+ required
 
-    - **Logger:** The Logger middleware gathers metrics from the upstream handlers (status code, duration, bytes written) and logs them to stdout.
+```sh
+git clone https://github.com/dillonstreator/template-go-chi
 
-- Comes with some helpful internal packages:
+cd template-go-chi
 
-    - **logger:** The internal logger package is centered around Go's [slog package](https://pkg.go.dev/golang.org/x/exp/slog) but has some pre-configured loggers for added ease of use.
+go run .
+```
 
-    - **router:** This is where the Chi router is initialized and global middlewares are registered like the `TrustProxy` and `Logger`middlewares. Along with registering some handlers and path prefixes.
+## Configuration
 
-    - **responder:** Comes with a few utility functions to send json (formatted and unformatted) or plaintext responses to the http client.
+See all example configuration via environment variables in [`.env-example`](./.env-example)
 
-    - **tools:** Simple tools package, currently only has a `EnvPortOr` function that reads the `PORT` variable from the environment or falls back to the provided port.
+### Open Telemetry
 
-    - **server:** This is where the `http.Server` settings are configured and the server is started from.
+Open Telemetry is disabled by default but can be enabled by setting the `OTEL_ENABLED` environment to `true`.
 
-    - **routes:** Where all the handlers and paths live, this template comes with the following prefixes and handlers:
+By default, the trace exporter is set to standard output. This can be overridden by setting `OTEL_EXPORTER_OTLP_ENDPOINT`.
 
-        `/`: Returns a greeting message.
-        
-        `/health`: Returns just a 200 status code.
-
-        `/api/`: The api prefix, with a subrouter.
-
-        `/api/v1/`: The v1 prefix with a subrouter, registered on the `/api/` subrouter.
-
-        `/api/v1/temperature`: Simple mock api endpoint.
-
-        `/api/v1/forecast/3day`: Just another mock api endpoint, but with a path parameter.
-
-## How to use
-
-- Download the Go modules: `go mod download`
-
-- Start the server: `go run main.go`
-
-- Open the browser or any api test program to `http://127.0.0.1:3000`
-
-- Start coding!
-
-## Notes
-
-- The http server listens on port `3000` if no environment variable `PORT` is found, and once on Railway a `PORT` variable is automatically generated, and `EnvPortOr` will use that `PORT` instead of `3000`.
+Start the `jaegertracing/all-in-one` container with `docker-compose up` and set `OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318` to collect logs in jaeger. Docker compose will expose jaeger at http://localhost:16686
