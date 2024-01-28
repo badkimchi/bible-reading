@@ -1,3 +1,5 @@
+This project hosts source code for a radical new bible study app!
+
 # `template-go-chi`
 
 A minimal production-ready golang HTTP server with [`go-chi/chi`](https://github.com/go-chi/chi).
