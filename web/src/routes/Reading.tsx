@@ -1,45 +1,43 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {AppLayout} from '@/components/layouts/AppLayout';
 import {Button} from "@/components/ui/button";
 import {APIAudio} from "../lib/api/APIAudio.tsx";
 
 export const Reading: React.FC = () => {
     const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder>(new MediaRecorder(new MediaStream()));
-    let chunks: Array<Blob> = []
-    let audioURL = ''
+    const [chunks, setChunks] = useState<Array<Blob>>([]);
+    const [audioURL, setAudioURL] = useState<string>('');
 
-    // mediaRecorder setup for audio
-    if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
-        console.log('mediaDevices supported..')
-        navigator.mediaDevices.getUserMedia({
-            audio: true
-        }).then(stream => {
-            const rec = new MediaRecorder(stream);
-            setMediaRecorder(rec);
-            rec.ondataavailable = (e) => {
-                chunks.push(e.data)
-                console.log(e.data);
-            }
-            rec.onstop = () => {
-                const blob = new Blob(chunks, {'type': 'audio/ogg; codecs=opus'})
-                chunks = []
-                const url = window.URL || window.webkitURL;
-                audioURL = url.createObjectURL(blob)
-                const audio = document.querySelector('audio')
-                if (audio) {
-                    audio.src = audioURL;
+    useEffect(() => {
+        // mediaRecorder setup for audio
+        if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
+            console.log('mediaDevices supported..')
+            navigator.mediaDevices.getUserMedia({
+                audio: true
+            }).then(stream => {
+                const rec = new MediaRecorder(stream);
+                setMediaRecorder(rec);
+                rec.ondataavailable = (e) => {
+                    chunks.push(e.data);
                 }
-            }
-            const myStream = rec.stream;
-            console.log(myStream);
-            myStream.onaddtrack = (e) => {
-                console.log(e);
-            }
-
-        }).catch(error => {
-            console.log('Following error has occured : ',error)
-        })
-    }
+                rec.onstop = () => {
+                    const blob = new Blob(chunks, {'type': 'audio/ogg; codecs=opus'})
+                    setChunks([]);
+                    const url = window.URL || window.webkitURL;
+                    const audioURL = url.createObjectURL(blob);
+                    setAudioURL(audioURL);
+                    const audio = document.querySelector('audio')
+                    if (audio) {
+                        audio.src = audioURL;
+                    }
+                }
+                const myStream = rec.stream;
+                console.log(myStream);
+            }).catch(error => {
+                console.log('Following error has occured : ',error)
+            })
+        }
+    }, [])
 
     const record = () => {
         mediaRecorder.start()
