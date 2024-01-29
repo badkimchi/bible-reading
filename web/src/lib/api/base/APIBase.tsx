@@ -73,9 +73,11 @@ export class APIBase {
 
     public postFile<T, R = BaseResponse<T>>(url: string, data?: any, eventListener?: any): Promise<R> {
         this.config.onUploadProgress = eventListener;
-        const headers = this.config.headers;
-        headers["Content-Type"] = "multipart/form-data";
-        this.config.headers = headers;
+        if (this.config.headers) {
+            const headers = this.config.headers;
+            headers["Content-Type"] = "multipart/form-data";
+            this.config.headers = headers;
+        }
         return this.api.post(url, data, this.config);
     }
 

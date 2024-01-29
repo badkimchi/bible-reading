@@ -1,11 +1,10 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {AppLayout} from '@/components/layouts/AppLayout';
 import {Button} from "@/components/ui/button";
-import {Form} from "react-router-dom";
 import {APIAudio} from "../lib/api/APIAudio.tsx";
 
 export const Reading: React.FC = () => {
-    let mediaRecorder
+    const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder>(new MediaRecorder(new MediaStream()));
     let chunks: Array<Blob> = []
     let audioURL = ''
 
@@ -15,19 +14,23 @@ export const Reading: React.FC = () => {
         navigator.mediaDevices.getUserMedia({
             audio: true
         }).then(stream => {
-            mediaRecorder = new MediaRecorder(stream)
-            mediaRecorder.ondataavailable = (e) => {
+            const rec = new MediaRecorder(stream);
+            setMediaRecorder(rec);
+            rec.ondataavailable = (e) => {
                 chunks.push(e.data)
                 console.log(e.data);
             }
-            mediaRecorder.onstop = () => {
+            rec.onstop = () => {
                 const blob = new Blob(chunks, {'type': 'audio/ogg; codecs=opus'})
                 chunks = []
                 const url = window.URL || window.webkitURL;
                 audioURL = url.createObjectURL(blob)
-                document.querySelector('audio').src = audioURL
+                const audio = document.querySelector('audio')
+                if (audio) {
+                    audio.src = audioURL;
+                }
             }
-            const myStream = mediaRecorder.stream;
+            const myStream = rec.stream;
             console.log(myStream);
             myStream.onaddtrack = (e) => {
                 console.log(e);

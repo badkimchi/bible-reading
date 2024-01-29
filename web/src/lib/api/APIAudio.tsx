@@ -8,7 +8,7 @@ export class API extends APIBase {
         super(base);
     }
 
-    public postAudio(data): Promise<string> {
+    public postAudio(data: FormData): Promise<string> {
         return this.postFile<string>('/audio', data)
             .then((response) => {
                 const {data} = response;
