@@ -5,7 +5,7 @@ import {APIAudio} from "../lib/api/APIAudio.tsx";
 
 export const Reading: React.FC = () => {
     const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder>(new MediaRecorder(new MediaStream()));
-    const [chunks, setChunks] = useState<Array<Blob>>([]);
+    const chunks: Array<Blob> = [];
     const [audioURL, setAudioURL] = useState<string>('');
 
     useEffect(() => {
@@ -18,11 +18,10 @@ export const Reading: React.FC = () => {
                 const rec = new MediaRecorder(stream);
                 setMediaRecorder(rec);
                 rec.ondataavailable = (e) => {
-                    chunks.push(e.data);
+                    chunks[0] = e.data;
                 }
                 rec.onstop = () => {
-                    const blob = new Blob(chunks, {'type': 'audio/ogg; codecs=opus'})
-                    setChunks([]);
+                    const blob = new Blob(chunks, {'type': 'audio/ogg; codecs=opus'});
                     const url = window.URL || window.webkitURL;
                     const audioURL = url.createObjectURL(blob);
                     setAudioURL(audioURL);
@@ -58,7 +57,6 @@ export const Reading: React.FC = () => {
         const blob = new Blob(chunks, {'type': 'audio/ogg; codecs=opus'});
         const formData = new FormData();
         formData.append('audioFile', blob, 'recording.ogg');
-
         APIAudio.postAudio(formData)
             .then(resp => console.log(resp))
             .catch(err => console.error(err));

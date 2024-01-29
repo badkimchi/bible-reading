@@ -56,14 +56,14 @@ func defineStaticRoutes(mux *chi.Mux) {
 func defineAPIRoutes(cont reqControllers, mux *chi.Mux, token *jwtauth.JWTAuth) {
 	//public path
 	mux.Post("/auth/login", cont.AuthC.Login)
-
+	mux.Get("/audio/{id}", cont.AudioC.GetAudio)
 	mux.Route("/api", func(api chi.Router) {
 		api.Use(middleware.Timeout(time.Second * 10))
 		api.Use(jwtauth.Verifier(token))
 		api.Use(middleware.Authenticator(0))
 
 		api.Get("/accounts/{id}", cont.AccC.GetAccount)
-		api.Get("/audio/{id}", cont.AudioC.GetAudio)
+		//api.Get("/audio/{id}", cont.AudioC.GetAudio)
 		api.Post("/audio", cont.AudioC.UploadAudio)
 	})
 }

@@ -2,6 +2,7 @@ package audio
 
 import (
 	"app/util/resp"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -50,6 +51,10 @@ func (c *AudioController) UploadAudio(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *AudioController) GetAudio(w http.ResponseWriter, r *http.Request) {
-
-	resp.Data(w, r, "")
+	var abc = "asd"
+	fmt.Println(abc)
+	fmt.Println(abc)
+	//w.Header().Set("Content-Type", "audio/ogg")
+	//w.Header().Set("Content-Disposition", "attachment; filename=uploaded_audio.ogg")
+	http.ServeFile(w, r, "/tmp/uploaded_audio.ogg")
 }
