@@ -1,9 +1,13 @@
 import React from 'react';
 import {AppLayout} from '@/components/layouts/AppLayout';
 import {Button} from "@/components/ui/button";
+import {Form} from "react-router-dom";
+import {APIAudio} from "../lib/api/APIAudio.tsx";
 
 export const Reading: React.FC = () => {
-    let mediaRecorder, chunks = [], audioURL = ''
+    let mediaRecorder
+    let chunks: Array<Blob> = []
+    let audioURL = ''
 
     // mediaRecorder setup for audio
     if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
@@ -19,8 +23,9 @@ export const Reading: React.FC = () => {
             mediaRecorder.onstop = () => {
                 const blob = new Blob(chunks, {'type': 'audio/ogg; codecs=opus'})
                 chunks = []
-                audioURL = window.URL.createObjectURL(blob)
-                // document.querySelector('audio').src = audioURL
+                const url = window.URL || window.webkitURL;
+                audioURL = url.createObjectURL(blob)
+                document.querySelector('audio').src = audioURL
             }
             const myStream = mediaRecorder.stream;
             console.log(myStream);
@@ -48,11 +53,22 @@ export const Reading: React.FC = () => {
         downloadLink.click()
     }
 
+    const uploadAudio = () => {
+        const blob = new Blob(chunks, {'type': 'audio/ogg; codecs=opus'});
+        const formData = new FormData();
+        formData.append('audioFile', blob, 'recording.ogg');
+
+        APIAudio.postAudio(formData)
+            .then(resp => console.log(resp))
+            .catch(err => console.error(err));
+    }
+
     return (
         <AppLayout>
             <Button onClick={record}>Record</Button>
             <Button onClick={stopRecording}>Stop</Button>
             <Button onClick={downloadAudio}>Download</Button>
+            <Button onClick={uploadAudio}>Upload</Button>
         </AppLayout>
     );
 };

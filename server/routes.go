@@ -63,6 +63,8 @@ func defineAPIRoutes(cont reqControllers, mux *chi.Mux, token *jwtauth.JWTAuth) 
 		api.Use(middleware.Authenticator(0))
 
 		api.Get("/accounts/{id}", cont.AccC.GetAccount)
+		api.Get("/audio/{id}", cont.AudioC.GetAudio)
+		api.Post("/audio", cont.AudioC.UploadAudio)
 	})
 }
 

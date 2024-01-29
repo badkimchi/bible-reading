@@ -21,14 +21,16 @@ package main
 import (
 	"app/conf"
 	"app/domains/account"
+	"app/domains/audio"
 	"app/sql/db"
 	"github.com/go-chi/jwtauth"
 	"github.com/google/wire"
 )
 
 type reqControllers struct {
-	AuthC account.AuthController
-	AccC  account.AccountController
+	AuthC  account.AuthController
+	AccC   account.AccountController
+	AudioC audio.AudioController
 }
 
 func controllers(config *conf.Config, jwtAuth *jwtauth.JWTAuth, queries *db.Queries) (
@@ -40,6 +42,7 @@ func controllers(config *conf.Config, jwtAuth *jwtauth.JWTAuth, queries *db.Quer
 		account.NewAccountController,
 		account.NewAccountService,
 		account.NewAccountRepo,
+		audio.NewAudioController,
 		wire.Bind(new(account.IAuthService), new(*account.AuthService)),
 		wire.Bind(new(account.IAccountService), new(*account.AccountService)),
 		wire.Bind(new(account.IAccountRepo), new(*account.AccountRepo)),
@@ -51,9 +54,11 @@ func controllers(config *conf.Config, jwtAuth *jwtauth.JWTAuth, queries *db.Quer
 func newReqControllers(
 	authC account.AuthController,
 	accC account.AccountController,
+	audioC audio.AudioController,
 ) reqControllers {
 	return reqControllers{
-		AuthC: authC,
-		AccC:  accC,
+		AuthC:  authC,
+		AccC:   accC,
+		AudioC: audioC,
 	}
 }
