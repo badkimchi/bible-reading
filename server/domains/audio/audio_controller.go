@@ -46,7 +46,6 @@ func (c *AudioController) UploadAudio(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte("File uploaded successfully"))
 	resp.Data(w, r, "success")
 }
 

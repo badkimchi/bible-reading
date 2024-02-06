@@ -5,7 +5,7 @@ import {APIAudio} from "../lib/api/APIAudio.tsx";
 
 export const Reading: React.FC = () => {
     const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder>(new MediaRecorder(new MediaStream()));
-    const chunks: Array<Blob> = [];
+    const [chunks, setChunks] = useState<Array<Blob>>([]);
     const [audioURL, setAudioURL] = useState<string>('');
 
     useEffect(() => {
@@ -19,6 +19,7 @@ export const Reading: React.FC = () => {
                 setMediaRecorder(rec);
                 rec.ondataavailable = (e) => {
                     chunks[0] = e.data;
+                    setChunks(chunks);
                 }
                 rec.onstop = () => {
                     const blob = new Blob(chunks, {'type': 'audio/ogg; codecs=opus'});
