@@ -2,8 +2,10 @@ import React, {useEffect, useState} from 'react';
 import {AppLayout} from '@/components/layouts/AppLayout';
 import {Button} from "@/components/ui/button";
 import {APIAudio} from "../lib/api/APIAudio.tsx";
+import {useLocation} from 'react-router-dom';
 
 export const Reading: React.FC = () => {
+    const location = useLocation();
     const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder>(new MediaRecorder(new MediaStream()));
     const [chunks, setChunks] = useState<Array<Blob>>([]);
     const [audioURL, setAudioURL] = useState<string>('');
@@ -31,8 +33,6 @@ export const Reading: React.FC = () => {
                         audio.src = audioURL;
                     }
                 }
-                const myStream = rec.stream;
-                console.log(myStream);
             }).catch(error => {
                 console.log('Following error has occured : ',error)
             })
@@ -62,9 +62,11 @@ export const Reading: React.FC = () => {
             .then(resp => console.log(resp))
             .catch(err => console.error(err));
     }
+    const audioUrl = `${window.location.protocol}//${window.location.hostname}:3000/audio/${location.pathname.split('/')[2]}`;
 
     return (
         <AppLayout>
+            <audio controls src={audioUrl}></audio>
             <Button onClick={record}>Record</Button>
             <Button onClick={stopRecording}>Stop</Button>
             <Button onClick={downloadAudio}>Download</Button>

@@ -25,13 +25,30 @@ export const Home: React.FC = () => {
             });
     }, [])
 
+    const chapterBlockStyle = 'flex w-40 h-40 float-left border-2 rounded-md m-2 ' +
+        'items-center justify-center cursor-pointer hover:bg-zinc-200';
+
     return (
         <AppLayout>
             <div className={'bg-blue-50 w-screen'}>
                 <Button onClick={signOut}> Sign Out</Button>
             </div>
-            <div  className={''}>
+            <div className={''}>
                 <Button onClick={startReading}> Start Reading</Button>
+            </div>
+            <div>Psalms</div>
+            <div className={''}>
+                {
+                    [...Array(150).keys()]
+                        .map((num, idx) => {
+                            return <div key={idx}
+                                        className={chapterBlockStyle}
+                                        onClick={()=> {navigate(`/psalms/${num + 1}`)}}
+                            >
+                                {num}
+                            </div>
+                        })
+                }
             </div>
         </AppLayout>
     );

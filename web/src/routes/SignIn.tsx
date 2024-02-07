@@ -1,11 +1,11 @@
 import React from 'react';
-import {AppLayout} from '../components/layouts/AppLayout';
-import {loginInfoStore} from "../lib/stores/loginInfoStore.ts";
+import {AppLayout} from '@/components/layouts/AppLayout';
+import {loginInfoStore} from "@/lib/stores/loginInfoStore";
 import {useNavigate} from "react-router-dom";
 import {APIAuth} from "../lib/api/APIAuth.tsx";
 import {APIAccount} from "../lib/api/APIAccount.tsx";
 import {useGoogleLogin} from "@react-oauth/google";
-import {LoginInfo} from "../lib/models/loginInfo.ts";
+import {LoginInfo} from "@/lib/models/loginInfo";
 
 export const SignIn: React.FC = () => {
     const navigate = useNavigate();
