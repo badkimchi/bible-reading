@@ -1,7 +1,13 @@
 package account
 
 import (
+	"app/conf"
+	"bytes"
+	"context"
+	"encoding/json"
+	"fmt"
 	"github.com/go-chi/jwtauth"
+	"golang.org/x/oauth2"
 	"net/http"
 	"strconv"
 	"strings"
@@ -15,6 +21,7 @@ type IAuthService interface {
 	getJwt(accountID string, level int) Jwt
 	exchangeRefreshToken(tokenString string) (bool, string, string)
 	CurrentUserID(r *http.Request) string
+	GetUserInfo(req OAuthRequest, config *conf.Config) (UserInfoDto, error)
 }
 
 type AuthService struct {
@@ -34,6 +41,45 @@ func NewAuthService(
 		authTokenDuration:    time.Hour * 12,
 		refreshTokenDuration: time.Hour * 13,
 	}
+}
+
+func (s *AuthService) GetUserInfo(req OAuthRequest, config *conf.Config) (UserInfoDto, error) {
+	var Endpoint = oauth2.Endpoint{
+		AuthURL:       "https://accounts.google.com/o/oauth2/auth",
+		TokenURL:      "https://oauth2.googleapis.com/token",
+		DeviceAuthURL: "https://oauth2.googleapis.com/device/code",
+		AuthStyle:     oauth2.AuthStyleInParams,
+	}
+	oauth := oauth2.Config{
+		ClientID:     config.GoogleClientID,
+		ClientSecret: config.GoogleClientSecret,
+		Endpoint:     Endpoint,
+		RedirectURL:  "postmessage",
+		Scopes:       []string{"https://www.googleapis.com/auth/drive.metadata.readonly"},
+	}
+	token, err := oauth.Exchange(context.Background(), req.Token)
+	if err != nil {
+		return UserInfoDto{}, err
+	}
+
+	authReq, err := http.NewRequest("GET", "https://www.googleapis.com/oauth2/v3/userinfo", bytes.NewBuffer([]byte("")))
+	authReq.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token.AccessToken))
+	if err != nil {
+		return UserInfoDto{}, err
+	}
+	client := &http.Client{Timeout: time.Millisecond * 1000}
+	apiResp, err := client.Do(authReq)
+	if err != nil {
+		return UserInfoDto{}, err
+	}
+
+	decoder := json.NewDecoder(apiResp.Body)
+	var info UserInfoDto
+	err = decoder.Decode(&info)
+	if err != nil {
+		return UserInfoDto{}, err
+	}
+	return info, nil
 }
 
 func (s *AuthService) setAuthTokenDuration(duration time.Duration) {
