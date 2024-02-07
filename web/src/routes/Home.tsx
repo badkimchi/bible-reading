@@ -25,7 +25,7 @@ export const Home: React.FC = () => {
             });
     }, [])
 
-    const chapterBlockStyle = 'flex w-40 h-40 float-left border-2 rounded-md m-2 ' +
+    const chapterBlockStyle = 'flex w-40 h-40 border-2 rounded-md m-4 ' +
         'items-center justify-center cursor-pointer hover:bg-zinc-200';
 
     return (
@@ -37,7 +37,7 @@ export const Home: React.FC = () => {
                 <Button onClick={startReading}> Start Reading</Button>
             </div>
             <div>Psalms</div>
-            <div className={''}>
+            <div className={'flex flex-wrap justify-center'}>
                 {
                     [...Array(150).keys()]
                         .map((num, idx) => {
