@@ -62,7 +62,10 @@ export const Reading: React.FC = () => {
             .then(resp => console.log(resp))
             .catch(err => console.error(err));
     }
-    const audioUrl = `${window.location.protocol}//${window.location.hostname}:3000/audio/${location.pathname.split('/')[2]}`;
+    let audioUrl = `${window.location.protocol}//${window.location.hostname}/audio/${location.pathname.split('/')[2]}`;
+    if (window.location.hostname === 'localhost') {
+       audioUrl = `http://localhost:3000/audio/${location.pathname.split('/')[2]}`
+    }
 
     return (
         <AppLayout>
