@@ -26,18 +26,15 @@ type IAuthService interface {
 
 type AuthService struct {
 	tokenAuth            *jwtauth.JWTAuth
-	accountServ          IAccountService
 	authTokenDuration    time.Duration
 	refreshTokenDuration time.Duration
 }
 
 func NewAuthService(
 	tAuth *jwtauth.JWTAuth,
-	accountServ IAccountService,
 ) *AuthService {
 	return &AuthService{
 		tokenAuth:            tAuth,
-		accountServ:          accountServ,
 		authTokenDuration:    time.Hour * 12,
 		refreshTokenDuration: time.Hour * 13,
 	}

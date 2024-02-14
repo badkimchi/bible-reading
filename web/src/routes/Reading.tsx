@@ -3,12 +3,15 @@ import {AppLayout} from '@/components/layouts/AppLayout';
 import {Button} from "@/components/ui/button";
 import {APIAudio} from "../lib/api/APIAudio.tsx";
 import {useLocation} from 'react-router-dom';
+import {loginInfoStore} from "@/lib/stores/loginInfoStore";
 
 export const Reading: React.FC = () => {
     const location = useLocation();
     const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder>(new MediaRecorder(new MediaStream()));
     const [chunks, setChunks] = useState<Array<Blob>>([]);
     const [audioURL, setAudioURL] = useState<string>('');
+    const [chapter, setChapter] = useState<string>('1');
+    const current = loginInfoStore(state => state.current);
 
     useEffect(() => {
         // mediaRecorder setup for audio
@@ -39,6 +42,10 @@ export const Reading: React.FC = () => {
         }
     }, [])
 
+    useEffect(() => {
+        setChapter(location.pathname.split('/')[2]);
+    }, [location])
+
     const record = () => {
         mediaRecorder.start()
     }
@@ -58,13 +65,14 @@ export const Reading: React.FC = () => {
         const blob = new Blob(chunks, {'type': 'audio/ogg; codecs=opus'});
         const formData = new FormData();
         formData.append('audioFile', blob, 'recording.ogg');
-        APIAudio.postAudio(formData)
+        APIAudio.postAudio(formData, chapter)
             .then(resp => console.log(resp))
             .catch(err => console.error(err));
     }
-    let audioUrl = `${window.location.protocol}//${window.location.hostname}/audio/${location.pathname.split('/')[2]}`;
+    const audioFile = `${location.pathname.split('/')[2]}-${current.email}.ogg`;
+    let audioUrl = `${window.location.protocol}//${window.location.hostname}/audio/${audioFile}`;
     if (window.location.hostname === 'localhost') {
-       audioUrl = `http://localhost:3000/audio/${location.pathname.split('/')[2]}`
+       audioUrl = `http://localhost:3000/audio/${audioFile}`
     }
 
     return (

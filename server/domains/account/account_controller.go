@@ -9,17 +9,14 @@ import (
 )
 
 type AccountController struct {
-	serv     IAccountService
-	authServ IAuthService
+	serv IAccountService
 }
 
 func NewAccountController(
 	serv IAccountService,
-	authServ IAuthService,
 ) AccountController {
 	return AccountController{
-		serv:     serv,
-		authServ: authServ,
+		serv: serv,
 	}
 }
 
@@ -35,14 +32,10 @@ func (c *AccountController) GetAccount(w http.ResponseWriter, r *http.Request) {
 		resp.Bad(w, r, err)
 		return
 	}
-	acc, err := c.serv.GetAccount(id)
+	acc, err := c.serv.GetAccount(r, id)
 	if err != nil {
 		resp.Bad(w, r, err)
 		return
-	}
-	userID := c.authServ.CurrentUserID(r)
-	if acc.Email != userID {
-		acc.Email = "Undisclosed"
 	}
 	resp.Data(w, r, acc)
 }

@@ -1,17 +1,23 @@
 package audio
 
 import (
+	"app/domains/account"
 	"app/util/resp"
+	"fmt"
+	"github.com/go-chi/chi"
 	"io"
 	"net/http"
 	"os"
 )
 
 type AudioController struct {
+	authServ account.IAuthService
 }
 
-func NewAudioController() AudioController {
-	return AudioController{}
+func NewAudioController(authServ account.IAuthService) AudioController {
+	return AudioController{
+		authServ: authServ,
+	}
 }
 
 func (c *AudioController) UploadAudio(w http.ResponseWriter, r *http.Request) {
@@ -30,8 +36,11 @@ func (c *AudioController) UploadAudio(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
+	chapter := chi.URLParam(r, "chapter")
+	fName := c.createFileName(chapter, r)
+
 	// Create a new file in the current working directory
-	dst, err := os.Create("/tmp/uploaded_audio.ogg")
+	dst, err := os.Create(fmt.Sprintf("/tmp/%s.ogg", fName))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -49,5 +58,10 @@ func (c *AudioController) UploadAudio(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *AudioController) GetAudio(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "/tmp/uploaded_audio.ogg")
+	fileName := chi.URLParam(r, "file_name")
+	http.ServeFile(w, r, fmt.Sprintf("/tmp/%s", fileName))
+}
+func (c *AudioController) createFileName(chapter string, r *http.Request) string {
+	userID := c.authServ.CurrentUserID(r)
+	return fmt.Sprintf("%s-%s", chapter, userID)
 }

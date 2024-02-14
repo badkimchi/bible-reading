@@ -21,12 +21,12 @@ import (
 // Injectors from wire.go:
 
 func controllers(config *conf.Config, jwtAuth *jwtauth.JWTAuth, queries *db.Queries) (reqControllers, error) {
+	authService := account.NewAuthService(jwtAuth)
 	accountRepo := account.NewAccountRepo(queries)
-	accountService := account.NewAccountService(accountRepo)
-	authService := account.NewAuthService(jwtAuth, accountService)
+	accountService := account.NewAccountService(accountRepo, authService)
 	authController := account.NewAuthController(config, jwtAuth, authService, accountService)
-	accountController := account.NewAccountController(accountService, authService)
-	audioController := audio.NewAudioController()
+	accountController := account.NewAccountController(accountService)
+	audioController := audio.NewAudioController(authService)
 	mainReqControllers := newReqControllers(authController, accountController, audioController)
 	return mainReqControllers, nil
 }
