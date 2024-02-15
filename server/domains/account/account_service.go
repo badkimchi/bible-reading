@@ -34,8 +34,11 @@ func (s *AccountService) GetAccount(r *http.Request, accountID int) (db.Account,
 	if err != nil {
 		return db.Account{}, err
 	}
-
-	userID := s.authServ.CurrentUserID(r)
+	token, err := s.authServ.JwtFrom(r)
+	if err != nil {
+		return db.Account{}, err
+	}
+	userID := s.authServ.CurrentUserID(token)
 	// do not disclose email of another user to the currently logged in user.
 	if acc.Email != userID {
 		acc.Email = "Undisclosed"
@@ -44,7 +47,11 @@ func (s *AccountService) GetAccount(r *http.Request, accountID int) (db.Account,
 }
 
 func (s *AccountService) GetAccountByEmail(email string) (db.Account, error) {
-	return s.repo.GetByEmail(email)
+	acc, err := s.repo.GetByEmail(email)
+	if err != nil {
+		return db.Account{}, err
+	}
+	return acc, nil
 }
 
 func (s *AccountService) GetAccountOrCreateIfNotExists(info UserInfoDto) (db.Account, error) {

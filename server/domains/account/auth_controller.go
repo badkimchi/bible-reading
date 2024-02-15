@@ -48,7 +48,11 @@ func (c *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 
 	info, err := c.serv.GetUserInfo(tokenReq, c.config)
 	acc, err := c.accServ.GetAccountOrCreateIfNotExists(info)
-	info.Jwt = c.serv.getJwt(info.Email, int(acc.Level))
+	if err != nil {
+		resp.Bad(w, r, err)
+		return
+	}
+	info.Jwt = c.serv.createJwt(info.Email, int(acc.Level))
 	resp.Data(w, r, info)
 }
 

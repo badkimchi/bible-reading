@@ -5,8 +5,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/go-chi/jwtauth"
+	"github.com/lestrrat-go/jwx/jwt"
 	"golang.org/x/oauth2"
 	"net/http"
 	"strconv"
@@ -18,9 +20,10 @@ type IAuthService interface {
 	setAuthTokenDuration(duration time.Duration)
 	authTokenExpireTime() time.Time
 	refreshTokenExpireTime() time.Time
-	getJwt(accountID string, level int) Jwt
+	createJwt(accountID string, level int) Jwt
+	JwtFrom(r *http.Request) (jwt.Token, error)
+	CurrentUserID(token jwt.Token) string
 	exchangeRefreshToken(tokenString string) (bool, string, string)
-	CurrentUserID(r *http.Request) string
 	GetUserInfo(req OAuthRequest, config *conf.Config) (UserInfoDto, error)
 }
 
@@ -90,26 +93,30 @@ func (s *AuthService) refreshTokenExpireTime() time.Time {
 	return time.Now().Add(s.refreshTokenDuration)
 }
 
-func (s *AuthService) getJwt(userID string, level int) Jwt {
+func (s *AuthService) createJwt(userID string, level int) Jwt {
 	authToken, expire := s.authToken(userID, level)
 	refToken, refExpire := s.getRefreshToken(userID, level)
 	rToken := RefreshToken{Token: refToken, Expiration: refExpire}
 	return Jwt{Token: authToken, Expiration: expire, RefreshToken: rToken}
 }
 
-func (s *AuthService) CurrentUserID(r *http.Request) string {
+func (s *AuthService) CurrentUserID(token jwt.Token) string {
+	claims := token.PrivateClaims()
+	userID := claims["user_id"].(string)
+	return userID
+}
+
+func (s *AuthService) JwtFrom(r *http.Request) (jwt.Token, error) {
 	tokenStr := r.Header.Get("Authorization")
 	token, found := strings.CutPrefix(tokenStr, "Bearer ")
 	if !found {
-		return "BAD_AUTH_TOKEN"
+		return nil, errors.New("no bearer token found")
 	}
-	jwt, err := s.tokenAuth.Decode(token)
+	jsonWebToken, err := s.tokenAuth.Decode(token)
 	if err != nil {
-		return "BAD_AUTH_TOKEN-2"
+		return nil, err
 	}
-	claims := jwt.PrivateClaims()
-	userID := claims["user_id"].(string)
-	return userID
+	return jsonWebToken, nil
 }
 
 // LoginInfo id is embedded in

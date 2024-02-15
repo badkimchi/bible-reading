@@ -21,6 +21,11 @@ func Data(w http.ResponseWriter, r *http.Request, v interface{}) {
 }
 
 func Bad(w http.ResponseWriter, r *http.Request, err error) {
+	if err == nil {
+		w.WriteHeader(500)
+		render.JSON(w, r, ResponseObj{Message: "unable to parse error", Data: "unable to parse error"})
+	}
+
 	statusCode := 400
 	if strings.Contains(err.Error(), "record not found") {
 		statusCode = 404

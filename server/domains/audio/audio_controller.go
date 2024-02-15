@@ -37,7 +37,12 @@ func (c *AudioController) UploadAudio(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 
 	chapter := chi.URLParam(r, "chapter")
-	fName := c.createFileName(chapter, r)
+	token, err := c.authServ.JwtFrom(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	fName := c.createFileName(chapter, c.authServ.CurrentUserID(token))
 
 	// Create a new file in the current working directory
 	dst, err := os.Create(fmt.Sprintf("/tmp/%s.ogg", fName))
@@ -61,7 +66,6 @@ func (c *AudioController) GetAudio(w http.ResponseWriter, r *http.Request) {
 	fileName := chi.URLParam(r, "file_name")
 	http.ServeFile(w, r, fmt.Sprintf("/tmp/%s", fileName))
 }
-func (c *AudioController) createFileName(chapter string, r *http.Request) string {
-	userID := c.authServ.CurrentUserID(r)
+func (c *AudioController) createFileName(chapter string, userID string) string {
 	return fmt.Sprintf("%s-%s", chapter, userID)
 }
