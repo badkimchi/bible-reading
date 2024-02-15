@@ -11,7 +11,7 @@ type AccountState = {
 export const loginInfoStore = create(
     persist<AccountState>(
         (set, _) => ({
-            current: null,
+            current: new LoginInfo(),
             setUser: (info) => set({current: info}),
             logout: () => set({current: null}),
         }),

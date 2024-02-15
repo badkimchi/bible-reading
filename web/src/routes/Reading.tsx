@@ -69,7 +69,7 @@ export const Reading: React.FC = () => {
             .then(resp => console.log(resp))
             .catch(err => console.error(err));
     }
-    const audioFile = `${location.pathname.split('/')[2]}-${current.email}.ogg`;
+    const audioFile = `${location.pathname.split('/')[2]}-${current?.email}.ogg`;
     let audioUrl = `${window.location.protocol}//${window.location.hostname}/audio/${audioFile}`;
     if (window.location.hostname === 'localhost') {
        audioUrl = `http://localhost:3000/audio/${audioFile}`
