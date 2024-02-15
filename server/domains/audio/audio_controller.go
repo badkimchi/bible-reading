@@ -37,12 +37,7 @@ func (c *AudioController) UploadAudio(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 
 	chapter := chi.URLParam(r, "chapter")
-	token, err := c.authServ.JwtFrom(r)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	fName := c.createFileName(chapter, c.authServ.CurrentUserID(token))
+	fName := c.createFileName(chapter, r.Context().Value("user_id").(string))
 
 	// Create a new file in the current working directory
 	dst, err := os.Create(fmt.Sprintf("/tmp/%s.ogg", fName))

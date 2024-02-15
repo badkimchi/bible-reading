@@ -22,7 +22,6 @@ type IAuthService interface {
 	refreshTokenExpireTime() time.Time
 	createJwt(accountID string, level int) Jwt
 	JwtFrom(r *http.Request) (jwt.Token, error)
-	CurrentUserID(token jwt.Token) string
 	exchangeRefreshToken(tokenString string) (bool, string, string)
 	GetUserInfo(req OAuthRequest, config *conf.Config) (UserInfoDto, error)
 }
@@ -98,12 +97,6 @@ func (s *AuthService) createJwt(userID string, level int) Jwt {
 	refToken, refExpire := s.getRefreshToken(userID, level)
 	rToken := RefreshToken{Token: refToken, Expiration: refExpire}
 	return Jwt{Token: authToken, Expiration: expire, RefreshToken: rToken}
-}
-
-func (s *AuthService) CurrentUserID(token jwt.Token) string {
-	claims := token.PrivateClaims()
-	userID := claims["user_id"].(string)
-	return userID
 }
 
 func (s *AuthService) JwtFrom(r *http.Request) (jwt.Token, error) {
