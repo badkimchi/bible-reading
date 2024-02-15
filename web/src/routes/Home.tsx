@@ -45,7 +45,7 @@ export const Home: React.FC = () => {
                                         className={chapterBlockStyle}
                                         onClick={()=> {navigate(`/psalms/${num + 1}`)}}
                             >
-                                {num}
+                                {num + 1}
                             </div>
                         })
                 }
